@@ -41,19 +41,19 @@ if __name__ == "__main__":
     tstart = 0.0
     tend = 1.0
     timesteps = int(fs*(tend-tstart))
-    Cm = 0.14e-10
-    Rin = 0.5e9
-    Er = -65e-3
-    Ee = -30e-3
-    Ei = -100e-3
+    Cm = 0.01
+    Rin = 1
+    Er = 0
+    Ee = 0.5
+    Ei = -0.5
     t = np.reshape(np.asarray(np.linspace(tstart, tend, timesteps), dtype=np.float32), (1, timesteps)) + np.zeros((batches, timesteps), dtype=np.float32)
-    Iinj = np.zeros(t.shape, dtype=t.dtype) + np.asarray(np.random.normal(size=(batches, 1), loc=0, scale=0.05e-9), dtype=np.float32)
+    Iinj = np.zeros(t.shape, dtype=t.dtype) + np.asarray(np.random.normal(size=(batches, 1), loc=0, scale=0.05), dtype=np.float32)*0
     Vm = Er+Rin*Iinj
     exe = np.zeros(t.shape, dtype=t.dtype)
     inh = np.zeros(t.shape, dtype=t.dtype)
     with tf.device("/CPU:0"):
-        ge = Synapse(amp=1e-9, td=0.02, tau=0.03)
-        gi = Synapse(amp=-1e-9, td=0.01, tau=0.03)
+        ge = Synapse(amp=1, td=0.02, tau=0.03)
+        gi = Synapse(amp=-1, td=0.01, tau=0.03)
         neuron = Neuron(Cm, Rin, Er, Ee, Ei)
         neuron.set_synapses(ge, gi)
         for i in range(1, timesteps):
