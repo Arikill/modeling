@@ -1,6 +1,7 @@
 import tensorflow as tf
+import numpy as np
 
-class Neuron(tf.Module):
+class Neuron:
     def __init__(self, nSynapses) -> None:
         self.nSynapses = nSynapses
         self.built = False
@@ -19,7 +20,7 @@ class Neuron(tf.Module):
         exponent = tf.cast(tf.greater(time, self.td), dtype=tf.float32)*(time-self.td)/self.tau
         return tf.tanh(tf.matmul(inputs, self.amp*exponent*tf.exp(-1*exponent + 1)))
 
-class Network(tf.Module):
+class Network:
     def __init__(self, structure):
         self.structure = structure
         self.built = False
@@ -46,10 +47,9 @@ class Network(tf.Module):
                 outputs = neuron(outputs, time)
         return outputs
 
-class Container(tf.Module):
+class Container:
     def __init__(self, structure):
         self.network = Network(structure)
-        self.cost = None
         self.built = False
         pass
 
@@ -64,7 +64,7 @@ class Container(tf.Module):
             outputs = [None for _ in range(nTimesteps)]
             for timestep in range(nTimesteps):
                 outputs[timestep] = self.network(inputs[:, timestep:timestep+1, :], 0.0)
-            tf.concat(outputs, axis=1)
+            outputs = tf.concat(outputs, axis=1)
         self.compute_cost(targets, outputs)
         self.built = True
         pass
@@ -87,7 +87,7 @@ class Container(tf.Module):
             for timestep in range(nTimesteps):
                 outputs[timestep] = self.network(inputs[:, timestep:timestep+1, :], t)
                 t = t+(1/fs)
-            tf.concat(outputs, axis=1)
+            outputs = tf.concat(outputs, axis=1)
         return self.compute_cost(targets, outputs)
 
 if __name__ == "__main__":
@@ -98,14 +98,15 @@ if __name__ == "__main__":
     tstart = 0.0
     tend = 0.1
     nTimesteps = int(fs*(tend-tstart))
-    nBatches = 100000
+    nBatches = 100
     nInputs = 1
     inputs = np.asarray(np.random.normal(size=(nBatches, nTimesteps, nInputs)), dtype=np.float32)
     nOutputs = 1
     targets = np.asarray(np.random.normal(size=(nBatches, nTimesteps, nOutputs)), dtype=np.float32)
     structure = [4, 2, nOutputs]
-    optimizer = NelderMead(soln_structure=structure, nSolutions= 4)
-    cost = optimizer(inputs, targets, fs, tstart)
+    with tf.device("/CPU:0"):
+        optimizer = NelderMead(soln_structure=structure, nSolutions= 4)
+        cost = optimizer(inputs, targets, fs, tstart)
     # container = Container(structure)
     # container.build(inputs.shape, targets.shape)
     # with tf.device("/GPU:0"):

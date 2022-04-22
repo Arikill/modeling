@@ -1,7 +1,7 @@
 import tensorflow as tf
 from Elements import Container
 
-class NelderMead(tf.Module):
+class NelderMead:
     def __init__(self, soln_structure, nSolutions=4, alpha=1, gamma=2, rho=0.5, sigma=0.5):
         self.structure = soln_structure
         self.nSolutions = nSolutions
@@ -77,7 +77,7 @@ class NelderMead(tf.Module):
             s1.network.pathway[index].td = s2.network.pathway[index].td
             s1.network.pathway[index].tau = s2.network.pathway[index].tau
             s1.network.pathway[index].amp = s2.network.pathway[index].amp
-            s1.network.pathway[index].cost = s2.network.pathway[index].cost
+            s1.cost = s2.cost
         pass
     
     def sort_solutions(self):
@@ -97,6 +97,7 @@ class NelderMead(tf.Module):
             solution.cost = solution(inputs, targets, fs, tstart)
         pass
 
+    # @tf.function
     def __call__(self, inputs, targets, fs, tstart):
         if not self.built:
             self.build(inputs.shape, targets.shape)
