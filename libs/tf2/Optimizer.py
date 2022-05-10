@@ -14,8 +14,10 @@ class NelderMead:
 
     def build(self, input_shape, target_shape):
         self.solutions = [Container(self.structure) for _ in range(self.nSolutions)]
+        print(self.solutions)
         for solution in self.solutions:
             solution.build(input_shape, target_shape)
+        print(self.solutions)
         self.centroid = Container(self.structure)
         self.centroid.build(input_shape, target_shape)
         self.reflection = Container(self.structure)
